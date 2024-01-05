@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2023 Evan Debenham
+ * Copyright (C) 2014-2022 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,6 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
-import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -60,7 +59,8 @@ public class Barkskin extends Buff {
 	}
 	
 	public void set( int value, int time ) {
-		if (level <= value) {
+		//decide whether to override, preferring high value + low interval
+		if (Math.sqrt(interval)*level <= Math.sqrt(time)*value) {
 			level = value;
 			interval = time;
 			spend(time - cooldown() - 1);
@@ -107,27 +107,5 @@ public class Barkskin extends Buff {
 		super.restoreFromBundle( bundle );
 		interval = bundle.getInt( INTERVAL );
 		level = bundle.getInt( LEVEL );
-	}
-
-	//These two methods allow for multiple instances of barkskin to stack in terms of duration
-	// but only the stronger bonus is applied
-
-	public static int currentLevel(Char ch ){
-		int level = 0;
-		for (Barkskin b : ch.buffs(Barkskin.class)){
-			level = Math.max(level, b.level);
-		}
-		return level;
-	}
-
-	//reset if a matching buff exists, otherwise append
-	public static void conditionallyAppend(Char ch, int level, int interval){
-		for (Barkskin b : ch.buffs(Barkskin.class)){
-			if (b.interval == interval){
-				b.set(level, interval);
-				return;
-			}
-		}
-		Buff.append(ch, Barkskin.class).set(level, interval);
 	}
 }

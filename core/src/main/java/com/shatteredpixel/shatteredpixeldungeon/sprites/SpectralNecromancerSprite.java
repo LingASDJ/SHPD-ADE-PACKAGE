@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2023 Evan Debenham
+ * Copyright (C) 2014-2022 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ import com.watabou.noosa.particles.Emitter;
 public class SpectralNecromancerSprite extends MobSprite {
 
 	private Animation charging;
-	private Emitter summoningParticles;
+	private Emitter summoningBones;
 
 	public SpectralNecromancerSprite(){
 		super();
@@ -75,44 +75,40 @@ public class SpectralNecromancerSprite extends MobSprite {
 	@Override
 	public void update() {
 		super.update();
-		if (summoningParticles != null && ((Necromancer) ch).summoningPos != -1){
-			summoningParticles.visible = Dungeon.level.heroFOV[((Necromancer) ch).summoningPos];
+		if (summoningBones != null && ((Necromancer) ch).summoningPos != -1){
+			summoningBones.visible = Dungeon.level.heroFOV[((Necromancer) ch).summoningPos];
 		}
 	}
 
 	@Override
 	public void die() {
 		super.die();
-		if (summoningParticles != null){
-			summoningParticles.on = false;
-			summoningParticles = null;
+		if (summoningBones != null){
+			summoningBones.on = false;
 		}
 	}
 
 	@Override
 	public void kill() {
 		super.kill();
-		if (summoningParticles != null){
-			summoningParticles.on = false;
-			summoningParticles = null;
+		if (summoningBones != null){
+			summoningBones.killAndErase();
 		}
 	}
 
 	public void cancelSummoning(){
-		if (summoningParticles != null){
-			summoningParticles.on = false;
-			summoningParticles = null;
+		if (summoningBones != null){
+			summoningBones.on = false;
 		}
 	}
 
 	public void finishSummoning(){
-		if (summoningParticles.visible) {
+		if (summoningBones.visible) {
 			Sample.INSTANCE.play(Assets.Sounds.CURSED);
-			summoningParticles.burst(ShadowParticle.CURSE, 5);
+			summoningBones.burst(ShadowParticle.CURSE, 5);
 		} else {
-			summoningParticles.on = false;
+			summoningBones.on = false;
 		}
-		summoningParticles = null;
 		idle();
 	}
 
@@ -124,13 +120,13 @@ public class SpectralNecromancerSprite extends MobSprite {
 	public void zap(int cell) {
 		super.zap(cell);
 		if (ch instanceof Necromancer && ((Necromancer) ch).summoning){
-			if (summoningParticles != null){
-				summoningParticles.on = false;
+			if (summoningBones != null){
+				summoningBones.on = false;
 			}
-			summoningParticles = CellEmitter.get(((Necromancer) ch).summoningPos);
-			summoningParticles.pour(ShadowParticle.MISSILE, 0.1f);
-			summoningParticles.visible = Dungeon.level.heroFOV[((Necromancer) ch).summoningPos];
-			if (visible || summoningParticles.visible ) Sample.INSTANCE.play( Assets.Sounds.CHARGEUP, 1f, 0.8f );
+			summoningBones = CellEmitter.get(((Necromancer) ch).summoningPos);
+			summoningBones.pour(ShadowParticle.MISSILE, 0.1f);
+			summoningBones.visible = Dungeon.level.heroFOV[((Necromancer) ch).summoningPos];
+			if (visible || summoningBones.visible ) Sample.INSTANCE.play( Assets.Sounds.CHARGEUP, 1f, 0.8f );
 		}
 	}
 

@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2023 Evan Debenham
+ * Copyright (C) 2014-2022 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,15 +63,13 @@ public class Sheep extends NPC {
 	public int defenseSkill(Char enemy) {
 		return INFINITE_EVASION;
 	}
-
+	
 	@Override
 	public void damage( int dmg, Object src ) {
-		//do nothing
 	}
 
 	@Override
-	public boolean add( Buff buff ) {
-		return false;
+	public void add( Buff buff ) {
 	}
 
 	@Override

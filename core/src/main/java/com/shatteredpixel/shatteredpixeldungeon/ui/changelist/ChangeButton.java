@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2023 Evan Debenham
+ * Copyright (C) 2014-2022 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.ui.changelist;
 
+import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.ChangesScene;
@@ -34,16 +35,16 @@ public class ChangeButton extends Component {
 	
 	protected Image icon;
 	protected String title;
-	protected String[] messages;
+	protected String message;
 	
-	public ChangeButton( Image icon, String title, String... messages){
+	public ChangeButton( Image icon, String title, String message){
 		super();
 		
 		this.icon = icon;
 		add(this.icon);
 		
 		this.title = Messages.titleCase(title);
-		this.messages = messages;
+		this.message = message;
 		
 		layout();
 	}
@@ -53,7 +54,7 @@ public class ChangeButton extends Component {
 	}
 	
 	protected void onClick() {
-		ChangesScene.showChangeInfo(new Image(icon), title, messages);
+		ChangesScene.showChangeInfo(new Image(icon), title, message);
 	}
 	
 	@Override

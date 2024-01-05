@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2023 Evan Debenham
+ * Copyright (C) 2014-2022 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Net;
 import com.watabou.noosa.Game;
 import com.watabou.utils.Bundle;
+import com.watabou.utils.DeviceCompat;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -38,7 +39,7 @@ public class GitHubUpdates extends UpdateService {
 	private static Pattern versionCodePattern = Pattern.compile("internal version number: ([0-9]*)", Pattern.CASE_INSENSITIVE);
 
 	@Override
-	public boolean supportsUpdatePrompts() {
+	public boolean isUpdateable() {
 		return true;
 	}
 
@@ -125,6 +126,16 @@ public class GitHubUpdates extends UpdateService {
 	@Override
 	public void initializeUpdate(AvailableUpdateData update) {
 		Game.platform.openURI( update.URL );
+	}
+
+	@Override
+	public boolean isInstallable() {
+		return false;
+	}
+
+	@Override
+	public void initializeInstall() {
+		//does nothing, always installed
 	}
 
 	@Override

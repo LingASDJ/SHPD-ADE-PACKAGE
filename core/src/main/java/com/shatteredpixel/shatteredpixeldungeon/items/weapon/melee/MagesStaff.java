@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2023 Evan Debenham
+ * Copyright (C) 2014-2022 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barrier;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
@@ -113,23 +114,8 @@ public class MagesStaff extends MeleeWeapon {
 	}
 
 	@Override
-	public String defaultAction() {
-		return AC_ZAP;
-	}
-
-	@Override
 	public void activate( Char ch ) {
-		super.activate(ch);
 		applyWandChargeBuff(ch);
-	}
-
-	@Override
-	public int targetingPos(Hero user, int dst) {
-		if (wand != null) {
-			return wand.targetingPos(user, dst);
-		} else {
-			return super.targetingPos(user, dst);
-		}
 	}
 
 	@Override
@@ -156,11 +142,11 @@ public class MagesStaff extends MeleeWeapon {
 	}
 
 	@Override
-	public int buffedVisiblyUpgraded() {
+	public int buffedLvl() {
 		if (wand != null){
-			return Math.max(super.buffedVisiblyUpgraded(), wand.buffedVisiblyUpgraded());
+			return Math.max(super.buffedLvl(), wand.buffedLvl());
 		} else {
-			return super.buffedVisiblyUpgraded();
+			return super.buffedLvl();
 		}
 	}
 
@@ -226,7 +212,7 @@ public class MagesStaff extends MeleeWeapon {
 
 	public Item imbueWand(Wand wand, Char owner){
 
-		int oldStaffcharges = this.wand != null ? this.wand.curCharges : 0;
+		int oldStaffcharges = this.wand.curCharges;
 
 		if (owner == Dungeon.hero && Dungeon.hero.hasTalent(Talent.WAND_PRESERVATION)){
 			Talent.WandPreservationCounter counter = Buff.affect(Dungeon.hero, Talent.WandPreservationCounter.class);

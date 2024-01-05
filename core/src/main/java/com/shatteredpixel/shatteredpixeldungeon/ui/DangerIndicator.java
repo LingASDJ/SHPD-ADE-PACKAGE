@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2023 Evan Debenham
+ * Copyright (C) 2014-2022 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ import com.watabou.noosa.Image;
 
 public class DangerIndicator extends Tag {
 	
-	public static final int COLOR	= 0xC03838;
+	public static final int COLOR	= 0xFF4C4C;
 	
 	private BitmapText number;
 	private Image icon;
@@ -46,7 +46,7 @@ public class DangerIndicator extends Tag {
 	public static int HEIGHT = 16;
 	
 	public DangerIndicator() {
-		super( COLOR );
+		super( 0xFF4C4C );
 		
 		setSize( SIZE, HEIGHT );
 		
@@ -109,7 +109,6 @@ public class DangerIndicator extends Tag {
 	
 	@Override
 	protected void onClick() {
-		super.onClick();
 		if (Dungeon.hero.visibleEnemies() > 0) {
 
 			Mob target = Dungeon.hero.visibleEnemy(++enemyIndex);

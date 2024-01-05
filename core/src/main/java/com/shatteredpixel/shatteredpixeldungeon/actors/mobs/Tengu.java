@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2023 Evan Debenham
+ * Copyright (C) 2014-2022 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -66,7 +66,7 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.MissileSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.TenguSprite;
 import com.shatteredpixel.shatteredpixeldungeon.tiles.DungeonTilemap;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BossHealthBar;
-import com.watabou.utils.BArray;
+import com.shatteredpixel.shatteredpixeldungeon.utils.BArray;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.noosa.particles.Emitter;
@@ -99,6 +99,16 @@ public class Tengu extends Mob {
 	}
 	
 	@Override
+	protected void onAdd() {
+		//when he's removed and re-added to the fight, his time is always set to now.
+		if (cooldown() > TICK) {
+			timeToNow();
+			spendToWhole();
+		}
+		super.onAdd();
+	}
+	
+	@Override
 	public int damageRoll() {
 		return Random.NormalIntRange( 6, 12 );
 	}
@@ -114,18 +124,17 @@ public class Tengu extends Mob {
 	
 	@Override
 	public int drRoll() {
-		return super.drRoll() + Random.NormalIntRange(0, 5);
+		return Random.NormalIntRange(0, 5);
 	}
 
 	boolean loading = false;
 
 	//Tengu is immune to debuffs and damage when removed from the level
 	@Override
-	public boolean add(Buff buff) {
+	public void add(Buff buff) {
 		if (Actor.chars().contains(this) || buff instanceof Doom || loading){
-			return super.add(buff);
+			super.add(buff);
 		}
-		return false;
 	}
 
 	@Override
@@ -149,8 +158,8 @@ public class Tengu extends Mob {
 		
 		LockedFloor lock = Dungeon.hero.buff(LockedFloor.class);
 		if (lock != null) {
-			if (Dungeon.isChallenged(Challenges.STRONGER_BOSSES))   lock.addTime(2*dmg/3f);
-			else                                                    lock.addTime(dmg);
+			int multiple = state == PrisonBossLevel.State.FIGHT_START ? 1 : 4;
+			lock.addTime(dmg*multiple);
 		}
 		
 		//phase 2 of the fight is over
@@ -556,17 +565,11 @@ public class Tengu extends Mob {
 		
 		int targetCell = -1;
 		
-		//Targets closest cell which is adjacent to target and has no existing bombs
+		//Targets closest cell which is adjacent to target
 		for (int i : PathFinder.NEIGHBOURS8){
 			int cell = target.pos + i;
-			boolean bombHere = false;
-			for (BombAbility b : thrower.buffs(BombAbility.class)){
-				if (b.bombPos == cell){
-					bombHere = true;
-				}
-			}
-			if (!bombHere && !Dungeon.level.solid[cell] &&
-					(targetCell == -1 || Dungeon.level.trueDistance(cell, thrower.pos) < Dungeon.level.trueDistance(targetCell, thrower.pos))){
+			if (targetCell == -1 ||
+					Dungeon.level.trueDistance(cell, thrower.pos) < Dungeon.level.trueDistance(targetCell, thrower.pos)){
 				targetCell = cell;
 			}
 		}
@@ -637,17 +640,17 @@ public class Tengu extends Mob {
 								}
 							}
 						}
-					}
 
-				}
-
-				Heap h = Dungeon.level.heaps.get(bombPos);
-				if (h != null) {
-					for (Item i : h.items.toArray(new Item[0])) {
-						if (i instanceof BombItem) {
-							h.remove(i);
+						Heap h = Dungeon.level.heaps.get(cell);
+						if (h != null) {
+							for (Item i : h.items.toArray(new Item[0])) {
+								if (i instanceof BombItem) {
+									h.remove(i);
+								}
+							}
 						}
 					}
+
 				}
 				Sample.INSTANCE.play(Assets.Sounds.BLAST);
 				detach();

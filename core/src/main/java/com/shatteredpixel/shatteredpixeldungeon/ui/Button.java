@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2023 Evan Debenham
+ * Copyright (C) 2014-2022 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,41 +32,37 @@ import com.watabou.noosa.PointerArea;
 import com.watabou.noosa.ui.Component;
 import com.watabou.utils.Signal;
 
+import java.util.ArrayList;
+
 public class Button extends Component {
 
 	public static float longClick = 0.5f;
 	
 	protected PointerArea hotArea;
 	protected Tooltip hoverTip;
-
-	//only one button should be pressed at a time
-	protected static Button pressedButton;
+	
+	protected boolean pressed;
 	protected float pressTime;
-	protected boolean clickReady;
+	protected boolean processed;
 
 	@Override
 	protected void createChildren() {
 		hotArea = new PointerArea( 0, 0, 0, 0 ) {
 			@Override
 			protected void onPointerDown( PointerEvent event ) {
-				pressedButton = Button.this;
+				pressed = true;
 				pressTime = 0;
-				clickReady = true;
+				processed = false;
 				Button.this.onPointerDown();
 			}
 			@Override
 			protected void onPointerUp( PointerEvent event ) {
-				if (pressedButton == Button.this){
-					pressedButton = null;
-				} else {
-					//cancel any potential click, only one button can be activated at a time
-					clickReady = false;
-				}
+				pressed = false;
 				Button.this.onPointerUp();
 			}
 			@Override
 			protected void onClick( PointerEvent event ) {
-				if (clickReady) {
+				if (!processed) {
 					killTooltip();
 					switch (event.button){
 						case PointerEvent.LEFT: default:
@@ -118,16 +114,14 @@ public class Button extends Component {
 			public boolean onSignal ( KeyEvent event ) {
 				if ( active && KeyBindings.getActionForKey( event ) == keyAction()){
 					if (event.pressed){
-						pressedButton = Button.this;
+						pressed = true;
 						pressTime = 0;
-						clickReady = true;
+						processed = false;
 						Button.this.onPointerDown();
 					} else {
 						Button.this.onPointerUp();
-						if (pressedButton == Button.this) {
-							pressedButton = null;
-							if (clickReady) onClick();
-						}
+						if (pressed && !processed) onClick();
+						pressed = false;
 					}
 					return true;
 				}
@@ -146,22 +140,24 @@ public class Button extends Component {
 	public GameAction secondaryTooltipAction(){
 		return null;
 	}
-
+	
 	@Override
 	public void update() {
 		super.update();
 		
 		hotArea.active = visible;
 		
-		if (pressedButton == this && (pressTime += Game.elapsed) >= longClick) {
-			pressedButton = null;
-			if (onLongClick()) {
+		if (pressed) {
+			if ((pressTime += Game.elapsed) >= longClick) {
+				pressed = false;
+				if (onLongClick()) {
 
-				hotArea.reset();
-				clickReady = false; //did a long click, can't do a regular one
-				onPointerUp();
-
-				Game.vibrate( 50 );
+					hotArea.reset();
+					processed = true;
+					onPointerUp();
+					
+					Game.vibrate( 50 );
+				}
 			}
 		}
 	}

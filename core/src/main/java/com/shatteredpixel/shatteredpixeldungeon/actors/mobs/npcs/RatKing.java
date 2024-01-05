@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2023 Evan Debenham
+ * Copyright (C) 2014-2022 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,15 +57,13 @@ public class RatKing extends NPC {
 	protected Char chooseEnemy() {
 		return null;
 	}
-
+	
 	@Override
 	public void damage( int dmg, Object src ) {
-		//do nothing
 	}
-
+	
 	@Override
-	public boolean add( Buff buff ) {
-		return false;
+	public void add( Buff buff ) {
 	}
 	
 	@Override
@@ -78,7 +76,7 @@ public class RatKing extends NPC {
 	@Override
 	protected void onAdd() {
 		super.onAdd();
-		if (firstAdded && Dungeon.depth != 5){
+		if (Dungeon.depth != 5){
 			yell(Messages.get(this, "confused"));
 		}
 	}

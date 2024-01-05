@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2023 Evan Debenham
+ * Copyright (C) 2014-2022 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,13 +54,9 @@ public class Journal {
 	
 	//package-private
 	static boolean saveNeeded = false;
-
+	
 	public static void saveGlobal(){
-		saveGlobal(false);
-	}
-
-	public static void saveGlobal(boolean force){
-		if (!force && !saveNeeded){
+		if (!saveNeeded){
 			return;
 		}
 		

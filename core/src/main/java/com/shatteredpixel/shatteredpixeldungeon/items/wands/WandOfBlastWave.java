@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2023 Evan Debenham
+ * Copyright (C) 2014-2022 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,8 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Paralysis;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Effects;
 import com.shatteredpixel.shatteredpixeldungeon.effects.MagicMissile;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Pushing;
@@ -88,7 +90,7 @@ public class WandOfBlastWave extends DamageWand {
 				if (ch.pos == bolt.collisionPos + i) {
 					Ballistica trajectory = new Ballistica(ch.pos, ch.pos + i, Ballistica.MAGIC_BOLT);
 					int strength = 1 + Math.round(buffedLvl() / 2f);
-					throwChar(ch, trajectory, strength, false, true, this);
+					throwChar(ch, trajectory, strength, false, true, getClass());
 				}
 
 			}
@@ -103,16 +105,16 @@ public class WandOfBlastWave extends DamageWand {
 			if (bolt.path.size() > bolt.dist+1 && ch.pos == bolt.collisionPos) {
 				Ballistica trajectory = new Ballistica(ch.pos, bolt.path.get(bolt.dist + 1), Ballistica.MAGIC_BOLT);
 				int strength = buffedLvl() + 3;
-				throwChar(ch, trajectory, strength, false, true, this);
+				throwChar(ch, trajectory, strength, false, true, getClass());
 			}
 		}
 		
 	}
 
 	public static void throwChar(final Char ch, final Ballistica trajectory, int power,
-	                             boolean closeDoors, boolean collideDmg, Object cause){
+	                             boolean closeDoors, boolean collideDmg, Class cause){
 		if (ch.properties().contains(Char.Property.BOSS)) {
-			power = (power+1)/2;
+			power /= 2;
 		}
 
 		int dist = Math.min(trajectory.dist, power);
@@ -149,7 +151,7 @@ public class WandOfBlastWave extends DamageWand {
 		final boolean finalCollided = collided && collideDmg;
 		final int initialpos = ch.pos;
 
-		Actor.add(new Pushing(ch, ch.pos, newPos, new Callback() {
+		Actor.addDelayed(new Pushing(ch, ch.pos, newPos, new Callback() {
 			public void call() {
 				if (initialpos != ch.pos || Actor.findChar(newPos) != null) {
 					//something caused movement or added chars before pushing resolved, cancel to be safe.
@@ -158,12 +160,12 @@ public class WandOfBlastWave extends DamageWand {
 				}
 				int oldPos = ch.pos;
 				ch.pos = newPos;
-				if (finalCollided && ch.isActive()) {
+				if (finalCollided && ch.isAlive()) {
 					ch.damage(Random.NormalIntRange(finalDist, 2*finalDist), this);
-					if (ch.isActive()) {
+					if (ch.isAlive()) {
 						Paralysis.prolong(ch, Paralysis.class, 1 + finalDist/2f);
 					} else if (ch == Dungeon.hero){
-						if (cause instanceof WandOfBlastWave || cause instanceof AquaBlast){
+						if (cause == WandOfBlastWave.class || cause == AquaBlast.class){
 							Badges.validateDeathFromFriendlyMagic();
 						}
 						Dungeon.fail(cause);
@@ -178,7 +180,7 @@ public class WandOfBlastWave extends DamageWand {
 					GameScene.updateFog();
 				}
 			}
-		}));
+		}), -1);
 	}
 
 	@Override
@@ -186,9 +188,9 @@ public class WandOfBlastWave extends DamageWand {
 		//acts like elastic enchantment
 		//we delay this with an actor to prevent conflicts with regular elastic
 		//so elastic always fully resolves first, then this effect activates
-		Actor.add(new Actor() {
+		Actor.addDelayed(new Actor() {
 			{
-				actPriority = VFX_PRIO+9; //act after pushing effects
+				actPriority = VFX_PRIO-1; //act after pushing effects
 			}
 
 			@Override
@@ -199,7 +201,7 @@ public class WandOfBlastWave extends DamageWand {
 				}
 				return true;
 			}
-		});
+		}, -1);
 	}
 
 	private static class BlastWaveOnHit extends Elastic{

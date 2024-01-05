@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2023 Evan Debenham
+ * Copyright (C) 2014-2022 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -107,14 +107,10 @@ public class Bomb extends Item {
 		super.execute(hero, action);
 	}
 
-	protected Fuse createFuse(){
-		return new Fuse();
-	}
-
 	@Override
 	protected void onThrow( int cell ) {
 		if (!Dungeon.level.pit[ cell ] && lightingFuse) {
-			Actor.addDelayed(fuse = createFuse().ignite(this), 2);
+			Actor.addDelayed(fuse = new Fuse().ignite(this), 2);
 		}
 		if (Actor.findChar( cell ) != null && !(Actor.findChar( cell ) instanceof Hero) ){
 			ArrayList<Integer> candidates = new ArrayList<>();
@@ -201,7 +197,7 @@ public class Bomb extends Item {
 						Badges.validateDeathFromFriendlyMagic();
 					}
 					GLog.n(Messages.get(this, "ondeath"));
-					Dungeon.fail(this);
+					Dungeon.fail(Bomb.class);
 				}
 			}
 			
@@ -273,7 +269,7 @@ public class Bomb extends Item {
 			actPriority = BLOB_PRIO+1; //after hero, before other actors
 		}
 
-		protected Bomb bomb;
+		private Bomb bomb;
 
 		public Fuse ignite(Bomb bomb){
 			this.bomb = bomb;
@@ -293,7 +289,21 @@ public class Bomb extends Item {
 			for (Heap heap : Dungeon.level.heaps.valueList()) {
 				if (heap.items.contains(bomb)) {
 
-					trigger(heap);
+					//FIXME this is a bit hacky, might want to generalize the functionality
+					//of bombs that don't explode instantly when their fuse ends
+					if (bomb instanceof Noisemaker){
+
+						((Noisemaker) bomb).setTrigger(heap.pos);
+
+					} else {
+
+						heap.remove(bomb);
+
+						bomb.explode(heap.pos);
+					}
+
+					diactivate();
+					Actor.remove(this);
 					return true;
 				}
 			}
@@ -301,18 +311,6 @@ public class Bomb extends Item {
 			//can't find our bomb, something must have removed it, do nothing.
 			bomb.fuse = null;
 			Actor.remove( this );
-			return true;
-		}
-
-		protected void trigger(Heap heap){
-			heap.remove(bomb);
-			bomb.explode(heap.pos);
-			Actor.remove(this);
-		}
-
-		public boolean freeze(){
-			bomb.fuse = null;
-			Actor.remove(this);
 			return true;
 		}
 	}

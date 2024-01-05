@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2023 Evan Debenham
+ * Copyright (C) 2014-2022 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AllyBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Amok;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Corruption;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Doom;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Dread;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Paralysis;
@@ -211,11 +212,10 @@ public class WandOfRegrowth extends Wand {
 		if (level() >= 10){
 			return Integer.MAX_VALUE;
 		} else {
-			//20 charges at base, plus:
-			//2/3.1/4.2/5.5/6.8/8.4/10.4/13.2/18.0/30.8/inf. charges per hero level, at wand level:
-			//0/1  /2  /3  /4  /5  /6   /7   /8   /9   /10
+			//8 charges at base, plus:
+			//2/3.33/5/7/10/14/20/30/50/110/infinite charges per hero level, based on wand level
 			float lvl = level();
-			return Math.round(20 + heroLvl * (2+lvl) * (1f + (lvl/(50 - 5*lvl))));
+			return Math.round(8 + heroLvl * (2+lvl) * (1f + (lvl/(10 - lvl))));
 		}
 	}
 
@@ -249,6 +249,7 @@ public class WandOfRegrowth extends Wand {
 
 		// 4/6/8 distance
 		int maxDist = 2 + 2*chargesPerCast();
+		int dist = Math.min(bolt.dist, maxDist);
 
 		cone = new ConeAOE( bolt,
 				maxDist,
@@ -256,11 +257,7 @@ public class WandOfRegrowth extends Wand {
 				Ballistica.STOP_SOLID | Ballistica.STOP_TARGET);
 
 		//cast to cells at the tip, rather than all cells, better performance.
-		Ballistica longestRay = null;
 		for (Ballistica ray : cone.outerRays){
-			if (longestRay == null || ray.dist > longestRay.dist){
-				longestRay = ray;
-			}
 			((MagicMissile)curUser.sprite.parent.recycle( MagicMissile.class )).reset(
 					MagicMissile.FOLIAGE_CONE,
 					curUser.sprite,
@@ -269,18 +266,18 @@ public class WandOfRegrowth extends Wand {
 			);
 		}
 
-		//final zap at half distance of the longest ray, for timing of the actual wand effect
+		//final zap at half distance, for timing of the actual wand effect
 		MagicMissile.boltFromChar( curUser.sprite.parent,
 				MagicMissile.FOLIAGE_CONE,
 				curUser.sprite,
-				longestRay.path.get(longestRay.dist/2),
+				bolt.path.get(dist/2),
 				callback );
 		Sample.INSTANCE.play( Assets.Sounds.ZAP );
 	}
 
 	@Override
 	protected int chargesPerCast() {
-		if (cursed || charger != null && charger.target.buff(WildMagic.WildMagicTracker.class) != null){
+		if (charger != null && charger.target.buff(WildMagic.WildMagicTracker.class) != null){
 			return 1;
 		}
 		//consumes 30% of current charges, rounded up, with a min of 1 and a max of 3.
@@ -448,12 +445,10 @@ public class WandOfRegrowth extends Wand {
 
 		@Override
 		public void damage( int dmg, Object src ) {
-			//do nothing
 		}
 
 		@Override
-		public boolean add( Buff buff ) {
-			return false;
+		public void add( Buff buff ) {
 		}
 
 		@Override

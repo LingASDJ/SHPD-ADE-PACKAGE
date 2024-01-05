@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2023 Evan Debenham
+ * Copyright (C) 2014-2022 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,9 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Belongings;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Enchanting;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
@@ -37,8 +39,10 @@ import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
+import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndBag;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndMessage;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndTitledMessage;
 import com.watabou.noosa.audio.Sample;
@@ -49,8 +53,6 @@ public class ScrollOfEnchantment extends ExoticScroll {
 		icon = ItemSpriteSheet.Icons.SCROLL_ENCHANT;
 
 		unique = true;
-
-		talentFactor = 2f;
 	}
 
 	protected static boolean identifiedByUse = false;
@@ -59,7 +61,6 @@ public class ScrollOfEnchantment extends ExoticScroll {
 	public void doRead() {
 		if (!isKnown()) {
 			identify();
-			curItem = detach(curUser.belongings.backpack);
 			identifiedByUse = true;
 		} else {
 			identifiedByUse = false;
@@ -114,10 +115,6 @@ public class ScrollOfEnchantment extends ExoticScroll {
 		public void onSelect(final Item item) {
 			
 			if (item instanceof Weapon){
-				if (!identifiedByUse) {
-					curItem.detach(curUser.belongings.backpack);
-				}
-				identifiedByUse = false;
 				
 				final Weapon.Enchantment enchants[] = new Weapon.Enchantment[3];
 				
@@ -129,10 +126,6 @@ public class ScrollOfEnchantment extends ExoticScroll {
 				GameScene.show(new WndEnchantSelect((Weapon) item, enchants[0], enchants[1], enchants[2]));
 			
 			} else if (item instanceof Armor) {
-				if (!identifiedByUse) {
-					curItem.detach(curUser.belongings.backpack);
-				}
-				identifiedByUse = false;
 				
 				final Armor.Glyph glyphs[] = new Armor.Glyph[3];
 				
@@ -142,8 +135,12 @@ public class ScrollOfEnchantment extends ExoticScroll {
 				glyphs[2] = Armor.Glyph.random( existing, glyphs[0].getClass(), glyphs[1].getClass());
 				
 				GameScene.show(new WndGlyphSelect((Armor) item, glyphs[0], glyphs[1], glyphs[2]));
-			} else if (identifiedByUse){
-				((ScrollOfEnchantment)curItem).confirmCancelation();
+			} else {
+				if (!identifiedByUse){
+					curItem.collect();
+				} else {
+					((ScrollOfEnchantment)curItem).confirmCancelation();
+				}
 			}
 		}
 	};
@@ -162,7 +159,7 @@ public class ScrollOfEnchantment extends ExoticScroll {
 		                           Weapon.Enchantment ench2, Weapon.Enchantment ench3){
 			super(new ItemSprite(new ScrollOfEnchantment()),
 					Messages.titleCase(new ScrollOfEnchantment().name()),
-					Messages.get(ScrollOfEnchantment.class, "weapon") +
+					Messages.get(ScrollOfEnchantment.class, "armor") +
 							"\n\n" +
 							Messages.get(ScrollOfEnchantment.class, "cancel_warn"),
 					ench1.name(),
@@ -185,6 +182,7 @@ public class ScrollOfEnchantment extends ExoticScroll {
 
 				Sample.INSTANCE.play( Assets.Sounds.READ );
 				Enchanting.show(curUser, wep);
+				Talent.onUpgradeScrollUsed( Dungeon.hero );
 			}
 
 			wep = null;
@@ -248,6 +246,7 @@ public class ScrollOfEnchantment extends ExoticScroll {
 
 				Sample.INSTANCE.play( Assets.Sounds.READ );
 				Enchanting.show(curUser, arm);
+				Talent.onUpgradeScrollUsed( Dungeon.hero );
 			}
 
 			arm = null;

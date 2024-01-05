@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2023 Evan Debenham
+ * Copyright (C) 2014-2022 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barrier;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Charm;
-import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mimic;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Beam;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
@@ -102,8 +101,7 @@ public class WandOfTransfusion extends Wand {
 				}
 
 			//for enemies...
-			//(or for mimics which are hiding, special case)
-			} else if (ch.alignment == Char.Alignment.ENEMY || ch instanceof Mimic) {
+			} else {
 
 				//grant a self-shield, and...
 				Buff.affect(curUser, Barrier.class).setShield((5 + buffedLvl()));
@@ -135,7 +133,7 @@ public class WandOfTransfusion extends Wand {
 
 		if (!curUser.isAlive()){
 			Badges.validateDeathFromFriendlyMagic();
-			Dungeon.fail( this );
+			Dungeon.fail( getClass() );
 			GLog.n( Messages.get(this, "ondeath") );
 		}
 	}

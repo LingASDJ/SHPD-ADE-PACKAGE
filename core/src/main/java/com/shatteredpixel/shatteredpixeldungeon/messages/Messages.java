@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2023 Evan Debenham
+ * Copyright (C) 2014-2022 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,17 +21,16 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.messages;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.utils.I18NBundle;
-import com.shatteredpixel.shatteredpixeldungeon.Assets;
-import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
-import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
+import com.badlogic.gdx.Gdx; 
+ import com.badlogic.gdx.utils.I18NBundle; 
+ import com.shatteredpixel.shatteredpixeldungeon.Assets; 
+ import com.shatteredpixel.shatteredpixeldungeon.SPDSettings; 
+ import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon; 
+ import com.shatteredpixel.shatteredpixeldungeon.utils.GLog; 
+ import com.watabou.utils.DeviceCompat; 
 
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IllegalFormatException;
 import java.util.Locale;
@@ -47,7 +46,6 @@ public class Messages {
 
 	private static ArrayList<I18NBundle> bundles;
 	private static Languages lang;
-	private static Locale locale;
 
 	public static final String NO_TEXT_FOUND = "!!!NO TEXT FOUND!!!";
 
@@ -55,9 +53,7 @@ public class Messages {
 		return lang;
 	}
 
-	public static Locale locale(){
-		return locale;
-	}
+
 
 	/**
 	 * Setup Methods
@@ -83,19 +79,12 @@ public class Messages {
 		//seeing as missing keys are part of our process, this is faster than throwing an exception
 		I18NBundle.setExceptionOnMissingKey(false);
 
-		//store language and locale info for various string logic
-		Messages.lang = lang;
-		if (lang == Languages.ENGLISH){
-			locale = Locale.ENGLISH;
-		} else {
-			locale = new Locale(lang.code());
-		}
-
-		//strictly match the language code when fetching bundles however
 		bundles = new ArrayList<>();
-		Locale bundleLocal = new Locale(lang.code());
+		Messages.lang = lang;
+		Locale locale = new Locale(lang.code());
+
 		for (String file : prop_files) {
-			bundles.add(I18NBundle.createBundle(Gdx.files.internal(file), bundleLocal));
+			bundles.add(I18NBundle.createBundle(Gdx.files.internal(file), locale));
 		}
 	}
 
@@ -103,9 +92,10 @@ public class Messages {
 
 	/**
 	 * Resource grabbing methods
+	 * 字段缺失检测器
 	 */
 
-	public static String get(String key, Object...args){
+     public static String get(String key, Object...args){
 		return get(null, key, args);
 	}
 
@@ -113,10 +103,15 @@ public class Messages {
 		return get(o.getClass(), k, args);
 	}
 
-	public static String get(Class c, String k, Object...args){
+	public static String get(Class c, String k, Object...args) {
+		return get(c, k, null, args);
+	}
+
+	private static String get(Class c, String k, String baseName, Object...args){
 		String key;
 		if (c != null){
-			key = c.getName().replace("com.shatteredpixel.shatteredpixeldungeon.", "");
+			key = c.getName();
+			key = key.replace("com.shatteredpixel.shatteredpixeldungeon.", "");
 			key += "." + k;
 		} else
 			key = k;
@@ -125,29 +120,35 @@ public class Messages {
 		if (value != null){
 			if (args.length > 0) return format(value, args);
 			else return value;
-		} else {
+		}  else {
+			//Use baseName so the missing string is clear what exactly needs replacing. Otherwise, it just says java.lang.Object.[key]
+			if (baseName == null) {
+				baseName = key;
+			}
 			//this is so child classes can inherit properties from their parents.
 			//in cases where text is commonly grabbed as a utility from classes that aren't mean to be instantiated
 			//(e.g. flavourbuff.dispTurns()) using .class directly is probably smarter to prevent unnecessary recursive calls.
 			if (c != null && c.getSuperclass() != null){
-				return get(c.getSuperclass(), k, args);
+				return get(c.getSuperclass(), k, baseName, args);
 			} else {
-				return NO_TEXT_FOUND;
+				String name = "Ms: "+baseName;
+				GLog.w(name);
+				return name;
 			}
 		}
 	}
-
-	private static String getFromBundle(String key){
-		String result;
-		for (I18NBundle b : bundles){
-			result = b.get(key);
-			//if it isn't the return string for no key found, return it
-			if (result.length() != key.length()+6 || !result.contains(key)){
-				return result;
-			}
-		}
-		return null;
-	}
+	
+    private static String getFromBundle(String key){
+        String result;
+        for (I18NBundle b : bundles){
+            result = b.get(key);
+            //if it isn't the return string for no key found, return it
+            if (result.length() != key.length()+6 || !result.contains(key)){
+                return result;
+            }
+        }
+        return null;
+    }
 
 
 
@@ -159,29 +160,23 @@ public class Messages {
 		try {
 			return String.format(Locale.ENGLISH, format, args);
 		} catch (IllegalFormatException e) {
-			ShatteredPixelDungeon.reportException( new Exception("formatting error for the string: " + format, e) );
+			ShatteredPixelDungeon.reportException( e );
 			return format;
 		}
 	}
 
-	private static HashMap<String, DecimalFormat> formatters = new HashMap<>();
-
-	public static String decimalFormat( String format, double number ){
-		if (!formatters.containsKey(format)){
-			formatters.put(format, new DecimalFormat(format, DecimalFormatSymbols.getInstance(Locale.ENGLISH)));
-		}
-		return formatters.get(format).format(number);
-	}
-
 	public static String capitalize( String str ){
 		if (str.length() == 0)  return str;
-		else                    return str.substring( 0, 1 ).toUpperCase(locale) + str.substring( 1 );
+		else                    return Character.toTitleCase( str.charAt( 0 ) ) + str.substring( 1 );
 	}
 
 	//Words which should not be capitalized in title case, mostly prepositions which appear ingame
 	//This list is not comprehensive!
 	private static final HashSet<String> noCaps = new HashSet<>(
-			Arrays.asList("a", "an", "and", "of", "by", "to", "the", "x", "for")
+			Arrays.asList(new String[]{
+					//English
+					"a", "an", "and", "of", "by", "to", "the", "x"
+			})
 	);
 
 	public static String titleCase( String str ){
@@ -202,13 +197,5 @@ public class Messages {
 
 		//Otherwise, use sentence case
 		return capitalize(str);
-	}
-
-	public static String upperCase( String str ){
-		return str.toUpperCase(locale);
-	}
-
-	public static String lowerCase( String str ){
-		return str.toLowerCase(locale);
 	}
 }

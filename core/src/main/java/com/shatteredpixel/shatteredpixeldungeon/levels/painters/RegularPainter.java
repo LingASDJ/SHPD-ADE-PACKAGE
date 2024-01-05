@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2023 Evan Debenham
+ * Copyright (C) 2014-2022 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -75,10 +75,6 @@ public abstract class RegularPainter extends Painter {
 		trapChances = chances;
 		return this;
 	}
-
-	protected int padding(Level level){
-		return level.feeling == Level.Feeling.CHASM ? 2 : 1;
-	}
 	
 	@Override
 	public boolean paint(Level level, ArrayList<Room> rooms) {
@@ -86,7 +82,7 @@ public abstract class RegularPainter extends Painter {
 		//painter can be used without rooms
 		if (rooms != null) {
 			
-			int padding = padding(level);
+			int padding = level.feeling == Level.Feeling.CHASM ? 2 : 1;
 			
 			int leftMost = Integer.MAX_VALUE, topMost = Integer.MAX_VALUE;
 			
@@ -286,9 +282,6 @@ public abstract class RegularPainter extends Painter {
 						break;
 					case CRYSTAL:
 						l.map[door] = Terrain.CRYSTAL_DOOR;
-						break;
-					case WALL:
-						l.map[door] = Terrain.WALL;
 						break;
 				}
 			}

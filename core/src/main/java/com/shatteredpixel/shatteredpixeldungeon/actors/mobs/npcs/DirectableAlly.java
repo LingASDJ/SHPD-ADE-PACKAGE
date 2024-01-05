@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2023 Evan Debenham
+ * Copyright (C) 2014-2022 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,10 +47,10 @@ public class DirectableAlly extends NPC {
 	protected boolean movingToDefendPos = false;
 
 	public void defendPos( int cell ){
-		defendingPos = cell;
-		movingToDefendPos = true;
 		aggro(null);
 		state = WANDERING;
+		defendingPos = cell;
+		movingToDefendPos = true;
 	}
 
 	public void clearDefensingPos(){
@@ -59,25 +59,17 @@ public class DirectableAlly extends NPC {
 	}
 
 	public void followHero(){
-		defendingPos = -1;
-		movingToDefendPos = false;
 		aggro(null);
 		state = WANDERING;
+		defendingPos = -1;
+		movingToDefendPos = false;
 	}
 
 	public void targetChar( Char ch ){
-		defendingPos = -1;
-		movingToDefendPos = false;
 		aggro(ch);
 		target = ch.pos;
-	}
-
-	@Override
-	public void aggro(Char ch) {
-		enemy = ch;
-		if (!movingToDefendPos && state != PASSIVE){
-			state = HUNTING;
-		}
+		defendingPos = -1;
+		movingToDefendPos = false;
 	}
 
 	public void directTocell( int cell ){

@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2023 Evan Debenham
+ * Copyright (C) 2014-2022 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,6 +41,7 @@ import com.watabou.utils.Bundle;
 import com.watabou.utils.Random;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 
@@ -289,7 +290,7 @@ public class Ring extends KindofMisc {
 		levelsToID -= levelPercent;
 		if (levelsToID <= 0){
 			identify();
-			GLog.p( Messages.get(Ring.class, "identify") );
+			GLog.p( Messages.get(Ring.class, "identify", title()) );
 			Badges.validateItemLevelAquired( this );
 		}
 	}
@@ -320,8 +321,7 @@ public class Ring extends KindofMisc {
 		}
 		return bonus;
 	}
-
-	//just used for ring descriptions
+	
 	public int soloBonus(){
 		if (cursed){
 			return Math.min( 0, Ring.this.level()-2 );
@@ -330,7 +330,6 @@ public class Ring extends KindofMisc {
 		}
 	}
 
-	//just used for ring descriptions
 	public int soloBuffedBonus(){
 		if (cursed){
 			return Math.min( 0, Ring.this.buffedLvl()-2 );
@@ -339,24 +338,13 @@ public class Ring extends KindofMisc {
 		}
 	}
 
-	//just used for ring descriptions
-	public static int combinedBuffedBonus(Char target, Class<?extends RingBuff> type){
-		int bonus = 0;
-		for (RingBuff buff : target.buffs(type)) {
-			bonus += buff.buffedLvl();
-		}
-		return bonus;
-	}
-
 	public class RingBuff extends Buff {
 
 		@Override
 		public boolean attachTo( Char target ) {
 			if (super.attachTo( target )) {
 				//if we're loading in and the hero has partially spent a turn, delay for 1 turn
-				if (target instanceof Hero && Dungeon.hero == null && cooldown() == 0 && target.cooldown() > 0) {
-					spend(TICK);
-				}
+				if (now() == 0 && cooldown() == 0 && target.cooldown() > 0) spend(TICK);
 				return true;
 			}
 			return false;

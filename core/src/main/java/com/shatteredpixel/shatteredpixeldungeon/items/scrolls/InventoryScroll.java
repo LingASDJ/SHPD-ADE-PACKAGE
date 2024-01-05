@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2023 Evan Debenham
+ * Copyright (C) 2014-2022 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,7 +40,6 @@ public abstract class InventoryScroll extends Scroll {
 		
 		if (!isKnown()) {
 			identify();
-			curItem = detach( curUser.belongings.backpack );
 			identifiedByUse = true;
 		} else {
 			identifiedByUse = false;
@@ -110,10 +109,7 @@ public abstract class InventoryScroll extends Scroll {
 			}
 			
 			if (item != null) {
-
-				if (!identifiedByUse) {
-					curItem = detach(curUser.belongings.backpack);
-				}
+				
 				((InventoryScroll)curItem).onItemSelected( item );
 				((InventoryScroll)curItem).readAnimation();
 				
@@ -123,7 +119,11 @@ public abstract class InventoryScroll extends Scroll {
 				
 				((InventoryScroll)curItem).confirmCancelation();
 				
-			} else if (((Scroll)curItem).anonymous) {
+			} else if (!((Scroll)curItem).anonymous) {
+				
+				curItem.collect( curUser.belongings.backpack );
+				
+			} else {
 
 				curUser.spendAndNext( TIME_TO_READ );
 

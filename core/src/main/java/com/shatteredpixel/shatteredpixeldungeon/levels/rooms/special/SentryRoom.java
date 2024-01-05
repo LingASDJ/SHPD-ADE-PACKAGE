@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2023 Evan Debenham
+ * Copyright (C) 2014-2022 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,7 +42,6 @@ import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.levels.painters.Painter;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.standard.EmptyRoom;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
-import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.MobSprite;
 import com.shatteredpixel.shatteredpixeldungeon.tiles.DungeonTilemap;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
@@ -277,21 +276,12 @@ public class SentryRoom extends SpecialRoom {
 		}
 
 		public void onZapComplete(){
-			if (hit(this, Dungeon.hero, true)) {
-				Dungeon.hero.damage(Random.NormalIntRange(2 + Dungeon.depth / 2, 4 + Dungeon.depth), new Eye.DeathGaze());
-				if (!Dungeon.hero.isAlive()) {
-					Badges.validateDeathFromEnemyMagic();
-					Dungeon.fail(this);
-					GLog.n(Messages.capitalize(Messages.get(Char.class, "kill", name())));
-				}
-			} else {
-				Dungeon.hero.sprite.showStatus( CharSprite.NEUTRAL,  Dungeon.hero.defenseVerb() );
+			Dungeon.hero.damage(Random.NormalIntRange(2+Dungeon.depth/2, 4+Dungeon.depth), new Eye.DeathGaze());
+			if (!Dungeon.hero.isAlive()){
+				Badges.validateDeathFromEnemyMagic();
+				Dungeon.fail( getClass() );
+				GLog.n( Messages.capitalize(Messages.get(Char.class, "kill", name())) );
 			}
-		}
-
-		@Override
-		public int attackSkill(Char target) {
-			return 20 + Dungeon.depth * 2;
 		}
 
 		@Override
@@ -301,12 +291,10 @@ public class SentryRoom extends SpecialRoom {
 
 		@Override
 		public void damage( int dmg, Object src ) {
-			//do nothing
 		}
 
 		@Override
-		public boolean add( Buff buff ) {
-			return false;
+		public void add( Buff buff ) {
 		}
 
 		@Override
@@ -420,11 +408,6 @@ public class SentryRoom extends SpecialRoom {
 		public void place(int cell) {
 			super.place(cell);
 			baseY = y;
-		}
-
-		@Override
-		public void turnTo(int from, int to) {
-			//do nothing
 		}
 
 		@Override

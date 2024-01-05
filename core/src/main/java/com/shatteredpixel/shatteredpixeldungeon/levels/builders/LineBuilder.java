@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2023 Evan Debenham
+ * Copyright (C) 2014-2022 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,47 +44,50 @@ public class LineBuilder extends RegularBuilder {
 		
 		entrance.setSize();
 		entrance.setPos(0, 0);
-
-		mainPathRooms.add(0, entrance);
-		if (exit != null) mainPathRooms.add(exit);
+		branchable.add(entrance);
 
 		if (shop != null){
 			placeRoom(rooms, entrance, shop, direction + 180f);
 		}
 		
-		Room prev = entrance;
-
+		int roomsOnPath = (int)(multiConnections.size()*pathLength) + Random.chances(pathLenJitterChances);
+		roomsOnPath = Math.min(roomsOnPath, multiConnections.size());
+		
+		Room curr = entrance;
+		
 		float[] pathTunnels = pathTunnelChances.clone();
-		for (int i = 1; i < mainPathRooms.size(); i++){
-			Room r = mainPathRooms.get(i);
-
+		for (int i = 0; i <= roomsOnPath; i++){
+			if (i == roomsOnPath && exit == null)
+				continue;
+			
 			int tunnels = Random.chances(pathTunnels);
 			if (tunnels == -1){
 				pathTunnels = pathTunnelChances.clone();
 				tunnels = Random.chances(pathTunnels);
 			}
 			pathTunnels[tunnels]--;
-
+			
 			for (int j = 0; j < tunnels; j++){
 				ConnectionRoom t = ConnectionRoom.createRoom();
-				placeRoom(rooms, prev, t, direction + Random.Float(-pathVariance, pathVariance));
+				placeRoom(rooms, curr, t, direction + Random.Float(-pathVariance, pathVariance));
 				branchable.add(t);
 				rooms.add(t);
-				prev = t;
+				curr = t;
 			}
 
-			placeRoom(rooms, prev, r, direction + Random.Float(-pathVariance, pathVariance));
+			Room r = (i == roomsOnPath ? exit : multiConnections.get(i));
+			placeRoom(rooms, curr, r, direction + Random.Float(-pathVariance, pathVariance));
 			branchable.add(r);
-			prev = r;
+			curr = r;
 		}
 		
 		ArrayList<Room> roomsToBranch = new ArrayList<>();
-		roomsToBranch.addAll(multiConnections);
+		for (int i = roomsOnPath; i < multiConnections.size(); i++){
+			roomsToBranch.add(multiConnections.get(i));
+		}
 		roomsToBranch.addAll(singleConnections);
 		weightRooms(branchable);
-		if (!createBranches(rooms, branchable, roomsToBranch, branchTunnelChances)){
-			return null;
-		}
+		createBranches(rooms, branchable, roomsToBranch, branchTunnelChances);
 		
 		findNeighbours(rooms);
 		

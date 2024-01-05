@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2023 Evan Debenham
+ * Copyright (C) 2014-2022 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -84,7 +84,7 @@ public class LoopBuilder extends RegularBuilder {
 		float startAngle = Random.Float(0, 360);
 
 		mainPathRooms.add(0, entrance);
-		if (exit != null) mainPathRooms.add((mainPathRooms.size()+1)/2, exit);
+		mainPathRooms.add((mainPathRooms.size()+1)/2, exit);
 
 		ArrayList<Room> loop = new ArrayList<>();
 		float[] pathTunnels = pathTunnelChances.clone();
@@ -155,9 +155,7 @@ public class LoopBuilder extends RegularBuilder {
 		roomsToBranch.addAll(multiConnections);
 		roomsToBranch.addAll(singleConnections);
 		weightRooms(branchable);
-		if (!createBranches(rooms, branchable, roomsToBranch, branchTunnelChances)){
-			return null;
-		}
+		createBranches(rooms, branchable, roomsToBranch, branchTunnelChances);
 		
 		findNeighbours(rooms);
 		

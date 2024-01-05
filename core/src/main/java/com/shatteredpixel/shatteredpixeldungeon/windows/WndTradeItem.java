@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2023 Evan Debenham
+ * Copyright (C) 2014-2022 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,8 +22,6 @@
 package com.shatteredpixel.shatteredpixeldungeon.windows;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
-import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
-import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Shopkeeper;
@@ -57,22 +55,12 @@ public class WndTradeItem extends WndInfoItem {
 
 		float pos = height;
 
-		//find the shopkeeper in the current level
-		Shopkeeper shop = null;
-		for (Char ch : Actor.chars()){
-			if (ch instanceof Shopkeeper){
-				shop = (Shopkeeper) ch;
-				break;
-			}
-		}
-		final Shopkeeper finalShop = shop;
-
 		if (item.quantity() == 1) {
 
 			RedButton btnSell = new RedButton( Messages.get(this, "sell", item.value()) ) {
 				@Override
 				protected void onClick() {
-					sell( item, finalShop);
+					sell( item );
 					hide();
 				}
 			};
@@ -88,7 +76,7 @@ public class WndTradeItem extends WndInfoItem {
 			RedButton btnSell1 = new RedButton( Messages.get(this, "sell_1", priceAll / item.quantity()) ) {
 				@Override
 				protected void onClick() {
-					sellOne( item, finalShop );
+					sellOne( item );
 					hide();
 				}
 			};
@@ -98,7 +86,7 @@ public class WndTradeItem extends WndInfoItem {
 			RedButton btnSellAll = new RedButton( Messages.get(this, "sell_all", priceAll ) ) {
 				@Override
 				protected void onClick() {
-					sell( item, finalShop );
+					sell( item );
 					hide();
 				}
 			};
@@ -188,12 +176,8 @@ public class WndTradeItem extends WndInfoItem {
 		}
 		if (selling) Shopkeeper.sell();
 	}
-
+	
 	public static void sell( Item item ) {
-		sell(item, null);
-	}
-
-	public static void sell( Item item, Shopkeeper shop ) {
 		
 		Hero hero = Dungeon.hero;
 		
@@ -206,23 +190,12 @@ public class WndTradeItem extends WndInfoItem {
 		hero.spend(-hero.cooldown());
 
 		new Gold( item.value() ).doPickUp( hero );
-
-		if (shop != null){
-			shop.buybackItems.add(item);
-			while (shop.buybackItems.size() > Shopkeeper.MAX_BUYBACK_HISTORY){
-				shop.buybackItems.remove(0);
-			}
-		}
 	}
 
 	public static void sellOne( Item item ) {
-		sellOne( item, null );
-	}
-
-	public static void sellOne( Item item, Shopkeeper shop ) {
 		
 		if (item.quantity() <= 1) {
-			sell( item, shop );
+			sell( item );
 		} else {
 			
 			Hero hero = Dungeon.hero;
@@ -233,13 +206,6 @@ public class WndTradeItem extends WndInfoItem {
 			hero.spend(-hero.cooldown());
 
 			new Gold( item.value() ).doPickUp( hero );
-
-			if (shop != null){
-				shop.buybackItems.add(item);
-				while (shop.buybackItems.size() > Shopkeeper.MAX_BUYBACK_HISTORY){
-					shop.buybackItems.remove(0);
-				}
-			}
 		}
 	}
 	

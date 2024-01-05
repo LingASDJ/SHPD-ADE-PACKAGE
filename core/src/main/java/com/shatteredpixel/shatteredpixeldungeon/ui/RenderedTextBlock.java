@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2023 Evan Debenham
+ * Copyright (C) 2014-2022 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,6 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.ui;
 
-import com.shatteredpixel.shatteredpixeldungeon.messages.Languages;
-import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.watabou.noosa.Game;
 import com.watabou.noosa.RenderedText;
@@ -212,10 +210,9 @@ public class RenderedTextBlock extends Component {
 		lines.add(curLine);
 
 		width = 0;
-		for (int i = 0; i < words.size(); i++){
-			RenderedText word = words.get(i);
+		for (RenderedText word : words){
 			if (word == SPACE){
-				x += 1.667f;
+				x += 1.5f;
 			} else if (word == NEWLINE) {
 				//newline
 				y += height+2f;
@@ -226,18 +223,7 @@ public class RenderedTextBlock extends Component {
 			} else {
 				if (word.height() > height) height = word.height();
 
-				float fullWidth = word.width();
-				int j = i+1;
-
-				//this is so that words split only by highlighting are still grouped in layout
-				//Chinese/Japanese always render every character separately without spaces however
-				while (Messages.lang() != Languages.CHINESE && Messages.lang() != Languages.JAPANESE
-						&& j < words.size() && words.get(j) != SPACE && words.get(j) != NEWLINE){
-					fullWidth += words.get(j).width() - 0.667f;
-					j++;
-				}
-
-				if ((x - this.x) + fullWidth - 0.001f > maxWidth && !curLine.isEmpty()){
+				if ((x - this.x) + word.width() > maxWidth && !curLine.isEmpty()){
 					y += height+2f;
 					x = this.x;
 					nLines++;
@@ -255,7 +241,7 @@ public class RenderedTextBlock extends Component {
 				
 				//Note that spacing currently doesn't factor in halfwidth and fullwidth characters
 				//(e.g. Ideographic full stop)
-				x -= 0.667f;
+				x -= 0.5f;
 
 			}
 		}

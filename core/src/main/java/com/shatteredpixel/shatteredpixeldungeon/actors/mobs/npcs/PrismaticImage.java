@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2023 Evan Debenham
+ * Copyright (C) 2014-2022 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.ToxicGas;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AllyBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Corruption;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.PrismaticGuard;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
@@ -36,8 +37,6 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.AntiMagic;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Brimstone;
-import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfAccuracy;
-import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfEvasion;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.Chasm;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.PrismaticSprite;
@@ -119,12 +118,7 @@ public class PrismaticImage extends NPC {
 			}
 		}
 	}
-
-	@Override
-	public boolean isActive() {
-		return isAlive() || deathTimer > 0;
-	}
-
+	
 	private static final String HEROID	= "hero_id";
 	private static final String TIMER	= "timer";
 	
@@ -161,8 +155,7 @@ public class PrismaticImage extends NPC {
 	@Override
 	public int attackSkill( Char target ) {
 		if (hero != null) {
-			//same base attack skill as hero, benefits from accuracy ring
-			return (int)((9 + hero.lvl) * RingOfAccuracy.accuracyMultiplier(hero));
+			return hero.attackSkill(target);
 		} else {
 			return 0;
 		}
@@ -172,13 +165,9 @@ public class PrismaticImage extends NPC {
 	public int defenseSkill(Char enemy) {
 		if (hero != null) {
 			int baseEvasion = 4 + hero.lvl;
-			int heroEvasion = (int)((4 + hero.lvl) * RingOfEvasion.evasionMultiplier( hero ));
-			if (hero.belongings.armor() != null){
-				heroEvasion = (int)hero.belongings.armor().evasionFactor(this, heroEvasion);
-			}
-
+			int heroEvasion = hero.defenseSkill(enemy);
+			
 			//if the hero has more/less evasion, 50% of it is applied
-			//includes ring of evasion and armor boosts
 			return super.defenseSkill(enemy) * (baseEvasion + heroEvasion) / 2;
 		} else {
 			return 0;
@@ -187,11 +176,10 @@ public class PrismaticImage extends NPC {
 	
 	@Override
 	public int drRoll() {
-		int dr = super.drRoll();
 		if (hero != null){
-			return dr + hero.drRoll();
+			return hero.drRoll();
 		} else {
-			return dr;
+			return 0;
 		}
 	}
 	

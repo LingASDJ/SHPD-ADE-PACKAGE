@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2023 Evan Debenham
+ * Copyright (C) 2014-2022 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,8 +60,7 @@ public class CavesPainter extends RegularPainter {
 			
 			if (Random.Int( s ) > 8) {
 				int corner = (room.left + 1) + (room.top + 1) * w;
-				if (map[corner-1] == Terrain.WALL && !room.connected.containsValue(level.cellToPoint(corner-1))
-						&& map[corner-w] == Terrain.WALL && !room.connected.containsValue(level.cellToPoint(corner-w))) {
+				if (map[corner - 1] == Terrain.WALL && map[corner - w] == Terrain.WALL) {
 					map[corner] = Terrain.WALL;
 					level.traps.remove(corner);
 				}
@@ -69,8 +68,7 @@ public class CavesPainter extends RegularPainter {
 			
 			if (Random.Int( s ) > 8) {
 				int corner = (room.right - 1) + (room.top + 1) * w;
-				if (map[corner+1] == Terrain.WALL && !room.connected.containsValue(level.cellToPoint(corner+1))
-						&& map[corner-w] == Terrain.WALL && !room.connected.containsValue(level.cellToPoint(corner-w))) {
+				if (map[corner + 1] == Terrain.WALL && map[corner - w] == Terrain.WALL) {
 					map[corner] = Terrain.WALL;
 					level.traps.remove(corner);
 				}
@@ -78,8 +76,7 @@ public class CavesPainter extends RegularPainter {
 			
 			if (Random.Int( s ) > 8) {
 				int corner = (room.left + 1) + (room.bottom - 1) * w;
-				if (map[corner-1] == Terrain.WALL && !room.connected.containsValue(level.cellToPoint(corner-1))
-						&& map[corner+w] == Terrain.WALL && !room.connected.containsValue(level.cellToPoint(corner+w))) {
+				if (map[corner - 1] == Terrain.WALL && map[corner + w] == Terrain.WALL) {
 					map[corner] = Terrain.WALL;
 					level.traps.remove(corner);
 				}
@@ -87,8 +84,7 @@ public class CavesPainter extends RegularPainter {
 			
 			if (Random.Int( s ) > 8) {
 				int corner = (room.right - 1) + (room.bottom - 1) * w;
-				if (map[corner+1] == Terrain.WALL && !room.connected.containsValue(level.cellToPoint(corner+1))
-						&& map[corner+w] == Terrain.WALL && !room.connected.containsValue(level.cellToPoint(corner+w))) {
+				if (map[corner + 1] == Terrain.WALL && map[corner + w] == Terrain.WALL) {
 					map[corner] = Terrain.WALL;
 					level.traps.remove(corner);
 				}
@@ -117,15 +113,6 @@ public class CavesPainter extends RegularPainter {
 			}
 		}
 		
-		generateGold(level, rooms);
-
-	}
-
-	protected void generateGold(Level level, ArrayList<Room> rooms){
-		int w = level.width();
-		int l = level.length();
-		int[] map = level.map;
-
 		for (int i=0; i < l - w; i++) {
 			if (map[i] == Terrain.WALL &&
 					DungeonTileSheet.floorTile(map[i + w])
@@ -133,5 +120,6 @@ public class CavesPainter extends RegularPainter {
 				map[i] = Terrain.WALL_DECO;
 			}
 		}
+
 	}
 }

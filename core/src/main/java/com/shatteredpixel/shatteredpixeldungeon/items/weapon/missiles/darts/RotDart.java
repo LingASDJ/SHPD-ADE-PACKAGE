@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2023 Evan Debenham
+ * Copyright (C) 2014-2022 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,14 +36,11 @@ public class RotDart extends TippedDart {
 	
 	@Override
 	public int proc(Char attacker, Char defender, int damage) {
-
-		//when processing charged shot, only corrode enemies
-		if (processingChargedShot && attacker.alignment == defender.alignment) {
-			//do nothing
-		} else if (defender.properties().contains(Char.Property.BOSS)
+		
+		if (defender.properties().contains(Char.Property.BOSS)
 				|| defender.properties().contains(Char.Property.MINIBOSS)){
 			Buff.affect(defender, Corrosion.class).set(5f, Dungeon.scalingDepth()/3);
-		} else {
+		} else{
 			Buff.affect(defender, Corrosion.class).set(10f, Dungeon.scalingDepth());
 		}
 		

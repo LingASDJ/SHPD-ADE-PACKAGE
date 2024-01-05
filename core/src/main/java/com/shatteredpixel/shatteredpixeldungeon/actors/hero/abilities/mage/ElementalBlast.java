@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2023 Evan Debenham
+ * Copyright (C) 2014-2022 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,6 +50,7 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.MagicMissile;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.SpellSprite;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShadowParticle;
+import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClassArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfMagicMapping;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
@@ -75,7 +76,6 @@ import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
-import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.Game;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Callback;
@@ -128,23 +128,12 @@ public class ElementalBlast extends ArmorAbility {
 	@Override
 	protected void activate(ClassArmor armor, Hero hero, Integer target) {
 		Ballistica aim;
-		//The direction of the aim only matters if it goes outside the map
-		//So we try to aim in the cardinal direction that has the most space
-		int x = hero.pos % Dungeon.level.width();
-		int y = hero.pos / Dungeon.level.width();
-
-		if (Math.max(x, Dungeon.level.width()-x) >= Math.max(y, Dungeon.level.height()-y)){
-			if (x > Dungeon.level.width()/2){
-				aim = new Ballistica(hero.pos, hero.pos - 1, Ballistica.WONT_STOP);
-			} else {
-				aim = new Ballistica(hero.pos, hero.pos + 1, Ballistica.WONT_STOP);
-			}
+		//Basically the direction of the aim only matters if it goes outside the map
+		//So we just ensure it won't do that.
+		if (hero.pos % Dungeon.level.width() > 10){
+			aim = new Ballistica(hero.pos, hero.pos - 1, Ballistica.WONT_STOP);
 		} else {
-			if (y > Dungeon.level.height()/2){
-				aim = new Ballistica(hero.pos, hero.pos - Dungeon.level.width(), Ballistica.WONT_STOP);
-			} else {
-				aim = new Ballistica(hero.pos, hero.pos + Dungeon.level.width(), Ballistica.WONT_STOP);
-			}
+			aim = new Ballistica(hero.pos, hero.pos + 1, Ballistica.WONT_STOP);
 		}
 
 		Class<? extends Wand> wandCls = null;
@@ -153,7 +142,6 @@ public class ElementalBlast extends ArmorAbility {
 		}
 
 		if (wandCls == null){
-			GLog.w(Messages.get(this, "no_staff"));
 			return;
 		}
 
@@ -194,7 +182,7 @@ public class ElementalBlast extends ArmorAbility {
 		((MagicMissile)hero.sprite.parent.recycle( MagicMissile.class )).reset(
 				effectTypes.get(wandCls),
 				hero.sprite,
-				aim.path.get(Math.min(aoeSize / 2, aim.path.size()-1)),
+				aim.path.get(aoeSize / 2),
 				new Callback() {
 					@Override
 					public void call() {
@@ -307,7 +295,7 @@ public class ElementalBlast extends ArmorAbility {
 												knockback,
 												true,
 												true,
-												ElementalBlast.this);
+												ElementalBlast.this.getClass());
 									}
 
 								//*** Wand of Frost ***

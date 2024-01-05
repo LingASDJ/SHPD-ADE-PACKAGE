@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2023 Evan Debenham
+ * Copyright (C) 2014-2022 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
-import com.watabou.utils.BArray;
+import com.shatteredpixel.shatteredpixeldungeon.utils.BArray;
 import com.watabou.noosa.Image;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.PathFinder;
@@ -116,9 +116,7 @@ public abstract class ChampionEnemy extends Buff {
 
 		@Override
 		public void onAttackProc(Char enemy) {
-			if (!Dungeon.level.water[enemy.pos]) {
-				Buff.affect(enemy, Burning.class).reignite(enemy);
-			}
+			Buff.affect(enemy, Burning.class).reignite(enemy);
 		}
 
 		@Override
@@ -126,7 +124,7 @@ public abstract class ChampionEnemy extends Buff {
 			//don't trigger when killed by being knocked into a pit
 			if (target.flying || !Dungeon.level.pit[target.pos]) {
 				for (int i : PathFinder.NEIGHBOURS9) {
-					if (!Dungeon.level.solid[target.pos + i] && !Dungeon.level.water[target.pos + i]) {
+					if (!Dungeon.level.solid[target.pos + i]) {
 						GameScene.add(Blob.seed(target.pos + i, 2, Fire.class));
 					}
 				}
@@ -156,20 +154,8 @@ public abstract class ChampionEnemy extends Buff {
 		}
 
 		@Override
-		public boolean canAttackWithExtraReach(Char enemy) {
-			if (Dungeon.level.distance( target.pos, enemy.pos ) > 4){
-				return false;
-			} else {
-				boolean[] passable = BArray.not(Dungeon.level.solid, null);
-				for (Char ch : Actor.chars()) {
-					//our own tile is always passable
-					passable[ch.pos] = ch == target;
-				}
-
-				PathFinder.buildDistanceMap(enemy.pos, passable, 4);
-
-				return PathFinder.distance[target.pos] <= 4;
-			}
+		public boolean canAttackWithExtraReach( Char enemy ) {
+			return target.fieldOfView[enemy.pos]; //if it can see it, it can attack it.
 		}
 	}
 
@@ -181,7 +167,7 @@ public abstract class ChampionEnemy extends Buff {
 
 		@Override
 		public float damageTakenFactor() {
-			return 0.5f;
+			return 0.75f;
 		}
 
 		{
@@ -199,7 +185,7 @@ public abstract class ChampionEnemy extends Buff {
 
 		@Override
 		public float damageTakenFactor() {
-			return 0.2f;
+			return 0.25f;
 		}
 
 		@Override
@@ -228,7 +214,7 @@ public abstract class ChampionEnemy extends Buff {
 
 		@Override
 		public float evasionAndAccuracyFactor() {
-			return 4f;
+			return 3f;
 		}
 	}
 
@@ -243,7 +229,7 @@ public abstract class ChampionEnemy extends Buff {
 		@Override
 		public boolean act() {
 			multiplier += 0.01f;
-			spend(4*TICK);
+			spend(3*TICK);
 			return true;
 		}
 

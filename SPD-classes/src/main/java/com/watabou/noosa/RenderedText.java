@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2023 Evan Debenham
+ * Copyright (C) 2014-2022 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,7 +35,6 @@ import com.watabou.glwrap.Quad;
 
 import java.nio.Buffer;
 import java.nio.FloatBuffer;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class RenderedText extends Image {
@@ -74,8 +73,6 @@ public class RenderedText extends Image {
 		this.size = size;
 		measure();
 	}
-
-	private static final ArrayList<Character> alreadyReported = new ArrayList<>();
 	
 	private synchronized void measure(){
 		
@@ -104,11 +101,7 @@ public class RenderedText extends Image {
 					if (toException.length() > 30){
 						toException = toException.substring(0, 30) + "...";
 					}
-					//reduces logspam
-					if (!alreadyReported.contains(c)) {
-						Game.reportException(new Throwable("font file " + font.toString() + " could not render " + c + " from string: " + toException));
-						alreadyReported.add(c);
-					}
+					Game.reportException(new Throwable("font file " + font.toString() + " could not render " + c + " from string: " + toException));
 				}
 			}
 			

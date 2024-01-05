@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2023 Evan Debenham
+ * Copyright (C) 2014-2022 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -72,19 +72,17 @@ public class Warlock extends Mob implements Callback {
 	
 	@Override
 	public int drRoll() {
-		return super.drRoll() + Random.NormalIntRange(0, 8);
+		return Random.NormalIntRange(0, 8);
 	}
 	
 	@Override
 	protected boolean canAttack( Char enemy ) {
-		return super.canAttack(enemy)
-				|| new Ballistica( pos, enemy.pos, Ballistica.MAGIC_BOLT).collisionPos == enemy.pos;
+		return new Ballistica( pos, enemy.pos, Ballistica.MAGIC_BOLT).collisionPos == enemy.pos;
 	}
 	
 	protected boolean doAttack( Char enemy ) {
 
-		if (Dungeon.level.adjacent( pos, enemy.pos )
-				|| new Ballistica( pos, enemy.pos, Ballistica.MAGIC_BOLT).collisionPos != enemy.pos) {
+		if (Dungeon.level.adjacent( pos, enemy.pos )) {
 			
 			return super.doAttack( enemy );
 			
@@ -107,7 +105,6 @@ public class Warlock extends Mob implements Callback {
 		spend( TIME_TO_ZAP );
 
 		Invisibility.dispel(this);
-		Char enemy = this.enemy;
 		if (hit( this, enemy, true )) {
 			//TODO would be nice for this to work on ghost/statues too
 			if (enemy == Dungeon.hero && Random.Int( 2 ) == 0) {
@@ -121,7 +118,7 @@ public class Warlock extends Mob implements Callback {
 			
 			if (enemy == Dungeon.hero && !enemy.isAlive()) {
 				Badges.validateDeathFromEnemyMagic();
-				Dungeon.fail( this );
+				Dungeon.fail( getClass() );
 				GLog.n( Messages.get(this, "bolt_kill") );
 			}
 		} else {
@@ -147,10 +144,22 @@ public class Warlock extends Mob implements Callback {
 			Dungeon.LimitedDrops.WARLOCK_HP.count++;
 			return new PotionOfHealing();
 		} else {
-			Item i;
-			do {
+			Item i = Generator.randomUsingDefaults(Generator.Category.POTION);
+			int healingTried = 0;
+			while (i instanceof PotionOfHealing){
+				healingTried++;
 				i = Generator.randomUsingDefaults(Generator.Category.POTION);
-			} while (i instanceof PotionOfHealing);
+			}
+
+			//return the attempted healing potion drops to the pool
+			if (healingTried > 0){
+				for (int j = 0; j < Generator.Category.POTION.classes.length; j++){
+					if (Generator.Category.POTION.classes[j] == PotionOfHealing.class){
+						Generator.Category.POTION.probs[j] += healingTried;
+					}
+				}
+			}
+
 			return i;
 		}
 

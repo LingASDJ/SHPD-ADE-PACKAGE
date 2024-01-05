@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2023 Evan Debenham
+ * Copyright (C) 2014-2022 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,12 +23,15 @@ package com.watabou.noosa.audio;
 
 import com.badlogic.gdx.Gdx;
 import com.watabou.noosa.Game;
-import com.watabou.utils.Callback;
 import com.watabou.utils.DeviceCompat;
 import com.watabou.utils.Random;
 
+import java.awt.MediaTracker;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public enum Music {
 	
@@ -41,10 +44,6 @@ public enum Music {
 	
 	private boolean enabled = true;
 	private float volume = 1f;
-
-	private float fadeTime = -1f;
-	private float fadeTotal = -1f;
-	private Callback onFadeOut = null;
 
 	String[] trackList;
 	float[] trackChances;
@@ -59,7 +58,6 @@ public enum Music {
 		}
 		
 		if (isPlaying() && lastPlayed != null && lastPlayed.equals( assetName )) {
-			player.setVolume(volumeWithFade());
 			return;
 		}
 		
@@ -102,10 +100,7 @@ public enum Music {
 				}
 			}
 
-			if (sameList) {
-				player.setVolume(volumeWithFade());
-				return;
-			}
+			if (sameList) return;
 		}
 
 		stop();
@@ -129,34 +124,6 @@ public enum Music {
 		}
 
 		play(trackQueue.remove(0), trackLooper);
-	}
-
-	public synchronized void fadeOut(float duration, Callback onComplete){
-		if (fadeTotal == -1f) {
-			fadeTotal = duration;
-			fadeTime = 0f;
-		} else {
-			fadeTime = (fadeTime/fadeTotal) * duration;
-			fadeTotal = duration;
-		}
-		onFadeOut = onComplete;
-	}
-
-	public synchronized void update(){
-		if (fadeTotal > 0f){
-			fadeTime += Game.elapsed;
-
-			if (player != null) {
-				player.setVolume(volumeWithFade());
-			}
-
-			if (fadeTime >= fadeTotal) {
-				fadeTime = fadeTotal = -1f;
-				if (onFadeOut != null){
-					onFadeOut.call();
-				}
-			}
-		}
 	}
 
 	private com.badlogic.gdx.audio.Music.OnCompletionListener trackLooper = new com.badlogic.gdx.audio.Music.OnCompletionListener() {
@@ -202,11 +169,9 @@ public enum Music {
 
 	private synchronized void play(String track, com.badlogic.gdx.audio.Music.OnCompletionListener listener){
 		try {
-			fadeTime = fadeTotal = -1;
-
 			player = Gdx.audio.newMusic(Gdx.files.internal(track));
 			player.setLooping(looping);
-			player.setVolume(volumeWithFade());
+			player.setVolume(volume);
 			player.play();
 			if (listener != null) {
 				player.setOnCompletionListener(listener);
@@ -246,15 +211,7 @@ public enum Music {
 	public synchronized void volume( float value ) {
 		volume = value;
 		if (player != null) {
-			player.setVolume( volumeWithFade() );
-		}
-	}
-
-	private synchronized float volumeWithFade(){
-		if (fadeTotal > 0f){
-			return Math.max(0, volume * ((fadeTotal - fadeTime) / fadeTotal));
-		} else {
-			return volume;
+			player.setVolume( value );
 		}
 	}
 	

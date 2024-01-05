@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2023 Evan Debenham
+ * Copyright (C) 2014-2022 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,12 +39,7 @@ public class HolyDart extends TippedDart {
 	
 	@Override
 	public int proc(Char attacker, Char defender, int damage) {
-
-		//do nothing to the hero when processing charged shot
-		if (processingChargedShot && defender == attacker){
-			return super.proc(attacker, defender, damage);
-		}
-
+		
 		if (attacker.alignment == defender.alignment){
 			Buff.affect(defender, Bless.class, Math.round(Bless.DURATION));
 			return 0;
@@ -54,8 +49,7 @@ public class HolyDart extends TippedDart {
 			defender.sprite.emitter().start( ShadowParticle.UP, 0.05f, 10+buffedLvl() );
 			Sample.INSTANCE.play(Assets.Sounds.BURNING);
 			defender.damage(Random.NormalIntRange(10 + Dungeon.scalingDepth()/3, 20 + Dungeon.scalingDepth()/3), this);
-		//also do not bless enemies if processing charged shot
-		} else if (!processingChargedShot){
+		} else {
 			Buff.affect(defender, Bless.class, Math.round(Bless.DURATION));
 		}
 		

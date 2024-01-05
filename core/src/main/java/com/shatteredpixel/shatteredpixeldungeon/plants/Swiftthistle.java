@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2023 Evan Debenham
+ * Copyright (C) 2014-2022 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -121,29 +121,18 @@ public class Swiftthistle extends Plant {
 			}
 		}
 
-		public void triggerPresses(){
-			for (int cell : presses){
-				Trap t = Dungeon.level.traps.get(cell);
-				if (t != null){
-					t.trigger();
-				}
-				Plant p = Dungeon.level.plants.get(cell);
-				if (p != null){
-					p.trigger();
-				}
+		public void triggerPresses() {
+			for (int cell : presses) {
+				Dungeon.level.pressCell(cell);
 			}
-
+			
 			presses = new ArrayList<>();
 		}
 
-		public void disarmPresses(){
+		public void disarmPressedTraps(){
 			for (int cell : presses){
 				Trap t = Dungeon.level.traps.get(cell);
-				if (t != null && t.disarmedByActivation) {
-					t.disarm();
-				}
-
-				Dungeon.level.uproot(cell);
+				if (t != null && t.disarmedByActivation) t.disarm();
 			}
 
 			presses = new ArrayList<>();
