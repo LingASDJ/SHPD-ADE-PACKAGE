@@ -1,5 +1,7 @@
 buildscript {
     repositories {
+            maven{ url 'https://maven.aliyun.com/repository/google' } 
+         maven{ url 'https://maven.aliyun.com/repository/jcenter'}
         google()
         mavenCentral()
     }
@@ -13,7 +15,8 @@ allprojects {
 
     ext {
         appName = 'Shattered Pixel Dungeon'
-        appPackageName = 'com.shatteredpixel.shatteredpixeldungeon'
+        //请修改默认名字↑ 和 包名↓，包名不要出现中文，建议x.x.x.x
+        appPackageName = 'com.shatteredpixel.shatteredpixeldungeon.aderest'
 
         appVersionCode = 754
         appVersionName = '2.2.1'
@@ -21,16 +24,17 @@ allprojects {
         appJavaCompatibility = JavaVersion.VERSION_1_8
 
         appAndroidCompileSDK = 33
-        appAndroidMinSDK = 14
+        appAndroidMinSDK = 16
         appAndroidTargetSDK = 33
 
         gdxVersion = '1.11.0'
         gdxControllersVersion = '2.2.4-SNAPSHOT'
-        robovmVersion = '2.3.19'
     }
     version = appVersionName
 
     repositories {
+            maven{ url 'https://maven.aliyun.com/repository/google' } 
+         maven{ url 'https://maven.aliyun.com/repository/jcenter'}
         google()
         mavenCentral()
         maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }

@@ -4,8 +4,9 @@ include ':core'
 
 //platform modules
 include ':android'
-include ':ios'
-include ':desktop'
+
+//由于ADE无法构建桌面端，故而注释，如果你后续有电脑，请去掉注释方可构建
+//include ':desktop'
 
 //service modules
 include ':services'

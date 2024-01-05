@@ -1,4 +1,7 @@
-apply plugin: 'com.android.application'
+plugins {
+    id 'com.android.application'
+    
+}
 
 android {
     namespace 'com.shatteredpixel.shatteredpixeldungeon.android'
@@ -58,6 +61,8 @@ configurations { natives }
 
 dependencies {
     implementation project(':core')
+    
+    implementation 'cat.ereza:customactivityoncrash:2.1.0'
 
     implementation "com.badlogicgames.gdx:gdx-backend-android:$gdxVersion"
     natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-armeabi-v7a"
