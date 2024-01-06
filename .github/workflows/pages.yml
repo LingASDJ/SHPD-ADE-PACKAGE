@@ -1,5 +1,0 @@
-uses: mattnotmitt/doxygen-action@v1.9.4
-with:
-    working-directory: 'src/'
-    doxyfile-path: 'docs/html'
-    enable-latex: true
