@@ -9,23 +9,13 @@ https://github.com/LingASDJ/SHPD-ADE-PACKAGE/tree/ADE-2.2.1
 
 
 <pre>
+请使用以下格式进行您的注释贡献:
 /**
- *
  */
-
- 	/**绘制圆形
-	 * 使用方法：<br>
-	 * Painter.drawCircle(level, center, eyeRadius - 2, EMPTY_SP);<br>
-	 * <br>
-	 * Author:BinJie GPT<br>
-	 * 注意：此代码使用AI生成<br>
-	 * AIModel-Author：JDSA-Ling<br>
-	 * @param level 楼层
-	 * @param center 中心点
-	 * @param radius 半径
-	 * @param terrain 所需要的地形
-	 */
 </pre>
+
+
+例子可以参考：<a href="classcom_1_1shatteredpixel_1_1shatteredpixeldungeon_1_1levels_1_1painters_1_1_painter.html">查看例子</a>
 
 
 ```java
