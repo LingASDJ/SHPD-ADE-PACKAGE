@@ -6,9 +6,27 @@
 开源地址：
 https://github.com/LingASDJ/SHPD-ADE-PACKAGE/tree/ADE-2.2.1
 
+
+
+<pre>
 /**
  *
  */
+
+ 	/**绘制圆形
+	 * 使用方法：<br>
+	 * Painter.drawCircle(level, center, eyeRadius - 2, EMPTY_SP);<br>
+	 * <br>
+	 * Author:BinJie GPT<br>
+	 * 注意：此代码使用AI生成<br>
+	 * AIModel-Author：JDSA-Ling<br>
+	 * @param level 楼层
+	 * @param center 中心点
+	 * @param radius 半径
+	 * @param terrain 所需要的地形
+	 */
+</pre>
+
 
 ```java
 	/**绘制圆形
