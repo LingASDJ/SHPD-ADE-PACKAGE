@@ -20,7 +20,7 @@ jobs:
           git push origin 2.2.1-Pages
 
       - name: Create PR
-        uses: peter-evans/create-pull-request@v3
+        uses: pascalgn/automerge-action@v0.15.6
         with:
           commit-message: Merge master into 2.2.1-Pages
           title: Merge master into 2.2.1-Pages
@@ -30,7 +30,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Merge PR
-        uses: peter-evans/merge-pull-request-action@v1.0.1
+        uses: pascalgn/automerge-action@v0.15.6
         with:
           pull-request-number: ${{ steps.create_pr.outputs.pull_request_number }}
           merge-method: merge
