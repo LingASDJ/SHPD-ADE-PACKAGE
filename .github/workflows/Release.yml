@@ -1,0 +1,37 @@
+name: Auto Merge Branch
+
+on:
+  push:
+    branches:
+      - 2.2.1-ADE
+
+jobs:
+  merge-branch:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Merge master into dev branch
+        run: |
+          git checkout 2.2.1-Pages
+          git merge master -m "Merge master into dev"
+          git push origin 2.2.1-Pages
+
+      - name: Create PR
+        uses: peter-evans/create-pull-request@v3
+        with:
+          commit-message: Merge master into 2.2.1-Pages
+          title: Merge master into 2.2.1-Pages
+          body: Automatic merge of new changes to dev branch
+          branch: 2.2.1-Pages
+          base: 2.2.1-ADE
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Merge PR
+        uses: peter-evans/merge-pull-request-action@v1.0.1
+        with:
+          pull-request-number: ${{ steps.create_pr.outputs.pull_request_number }}
+          merge-method: merge
+          token: ${{ secrets.GITHUB_TOKEN }}
