@@ -4,7 +4,7 @@
 请使用以下格式进行您的注释贡献。
 
 开源地址：
-https://github.com/LingASDJ/SHPD-ADE-PACKAGE/tree/ADE-2.2.1
+https://github.com/LingASDJ/SHPD-ADE-PACKAGE/tree/2.2.1-ADE
 
 
 
